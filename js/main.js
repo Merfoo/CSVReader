@@ -2,7 +2,6 @@ var tableData;
 var sortOrders;
 var fileName = "";
 var $table;
-var $tableContainer;
 
 // When document is loaded call init function
 $(document).ready(init);
@@ -24,16 +23,21 @@ function init()
 
 function makeTable()
 {
-    $tableContainer = document.getElementById("tableContainer");
-    var rows = tableData.length;
-    var cols = tableData[0].length;
+    var $tableContainer = document.getElementById("tableContainer");
     $table = document.createElement("table");
     $table.setAttribute("id", "table");
+    var rows = tableData.length;
+    var cols = tableData[0].length;
     
     for(var rowIndex = 0; rowIndex < rows; rowIndex++)
     {
         var newRow = document.createElement("tr");
         
+        if(rowIndex % 2 !== 0)
+            newRow.classList.add("darkGray");
+            
+        newRow.style.textAlign = "center";
+            
         for(var colIndex = 0; colIndex < cols; colIndex++)
         {
             var newCol = document.createElement("td");
@@ -45,11 +49,7 @@ function makeTable()
                 newCol.id = colIndex;
             }
             
-            if(rowIndex % 2 !== 0)
-                newCol.classList.add("darkGray");;
-            
             newCol.style.border = "1px solid black";
-            newCol.style.textAlign = "center";
             newCol.style.paddingLeft = "3px";
             newCol.style.paddingRight = "3px";
             newCol.innerHTML = !!tableData[rowIndex][colIndex] ? tableData[rowIndex][colIndex] : "";
@@ -67,19 +67,8 @@ function makeTable()
         sortOrders[rowIndex] = !sortOrders[rowIndex];
         sortRows(rowIndex, sortOrders[rowIndex]); 
     });
-}
-
-function getCsvToArray(csvData)
-{
-    var csvArray = csvData.split("\n");
     
-    if(csvArray[csvArray.length - 1] === "")
-        csvArray.pop();
-    
-    for(var index in csvArray)
-        csvArray[index] = csvArray[index].split(",");
-    
-    return csvArray;
+    $table = document.getElementById("table");
 }
 
 // Reads all files
@@ -100,13 +89,19 @@ function getFile(e)
 }
 
 // Processes the file 
-function processFile(data)
+function processFile(csvData)
 {
-    tableData = getCsvToArray(data);
     sortOrders = [];
+    tableData = csvData.split("\n");
     
-    for(var m in tableData)
+    if(tableData[tableData.length - 1] === "")
+        tableData.pop();
+    
+    for(var index in tableData)
+    {
+        tableData[index] = tableData[index].split(",");
         sortOrders.push(false);
+    }
     
     makeTable();
     $("#fileTitle")[0].innerHTML = fileName;
@@ -134,11 +129,12 @@ function sortRows(columnIndex, bigFirst)
                 var tmp = tableData[rowIndex];
                 tableData[rowIndex] = tableData[rowIndex + 1];
                 tableData[rowIndex + 1] = tmp;
+                tmp = $table.rows[rowIndex].innerHTML;
+                $table.rows[rowIndex].innerHTML = $table.rows[rowIndex + 1].innerHTML;
+                $table.rows[rowIndex + 1].innerHTML = tmp;
             }
         }
     }
-    
-    makeTable();
 }
 
 // Lazy to type "console.log()" a whole bunch
