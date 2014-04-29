@@ -124,3 +124,25 @@ body
     margin-left: 10px;
     margin-right: 10px;
 }
+
+.table
+{
+    border-collapse: collapse
+}
+
+.tableRow
+{
+    text-align: center;
+}
+
+.tableCell
+{
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+
+.tableCellHeader
+{
+    font-weight: bold;
+}

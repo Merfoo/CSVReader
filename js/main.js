@@ -1,6 +1,7 @@
 var tableData;
 var sortOrders;
 var fileName = "";
+var maxCols = 0;
 var $table;
 
 // When document is loaded call init function
@@ -26,32 +27,29 @@ function makeTable()
     var $tableContainer = document.getElementById("tableContainer");
     $table = document.createElement("table");
     $table.setAttribute("id", "table");
-    var rows = tableData.length;
-    var cols = tableData[0].length;
+    $table.classList.add("table");
     
-    for(var rowIndex = 0; rowIndex < rows; rowIndex++)
+    for(var rowIndex = 0; rowIndex < tableData.length; rowIndex++)
     {
         var newRow = document.createElement("tr");
         
         if(rowIndex % 2 !== 0)
             newRow.classList.add("darkGray");
             
-        newRow.style.textAlign = "center";
-            
-        for(var colIndex = 0; colIndex < cols; colIndex++)
+        newRow.classList.add("tableRow");
+        
+        for(var colIndex = 0; colIndex < maxCols; colIndex++)
         {
             var newCol = document.createElement("td");
             
             if(rowIndex === 0)
             {
                 newCol = document.createElement("th");
-                newCol.style.fontWeight = "bold";
+                newCol.classList.add("tableCellHeader");
                 newCol.id = colIndex;
             }
             
-            newCol.style.border = "1px solid black";
-            newCol.style.paddingLeft = "3px";
-            newCol.style.paddingRight = "3px";
+            newCol.classList.add("tableCell");
             newCol.innerHTML = !!tableData[rowIndex][colIndex] ? tableData[rowIndex][colIndex] : "";
             newRow.appendChild(newCol);
         }
@@ -93,14 +91,18 @@ function processFile(csvData)
 {
     sortOrders = [];
     tableData = csvData.split("\n");
-    
+    maxCols = 0;
+
     if(tableData[tableData.length - 1] === "")
         tableData.pop();
     
     for(var index in tableData)
     {
-        tableData[index] = tableData[index].split(",");
         sortOrders.push(false);
+        tableData[index] = tableData[index].split(",");
+
+        if(tableData[index].length > maxCols)
+            maxCols = tableData[index].length;
     }
     
     makeTable();
@@ -109,6 +111,7 @@ function processFile(csvData)
 
 function sortRows(columnIndex, bigFirst)
 {
+    var begTime = new Date().getTime();
     var changed = true;
     
     while(changed)
@@ -129,12 +132,20 @@ function sortRows(columnIndex, bigFirst)
                 var tmp = tableData[rowIndex];
                 tableData[rowIndex] = tableData[rowIndex + 1];
                 tableData[rowIndex + 1] = tmp;
-                tmp = $table.rows[rowIndex].innerHTML;
-                $table.rows[rowIndex].innerHTML = $table.rows[rowIndex + 1].innerHTML;
-                $table.rows[rowIndex + 1].innerHTML = tmp;
             }
         }
     }
+    
+    updateTable();
+    console.log(new Date().getTime() - begTime);
+}
+
+// Updates the table
+function updateTable()
+{
+    for(var rowIndex = 0; rowIndex < tableData.length; rowIndex++)
+        for(var colIndex = 0; colIndex < maxCols; colIndex++)
+            $table.rows[rowIndex].cells[colIndex].innerHTML = !!tableData[rowIndex][colIndex] ? tableData[rowIndex][colIndex] : "";
 }
 
 // Lazy to type "console.log()" a whole bunch
